@@ -6,7 +6,8 @@ Paste a resume and a job description, get an honest ATS-style score, missing key
 
 ## What makes it more than the starter
 - **Prompt engineering (ROLE + TASK + FORMAT + RULES)** with a scoring rubric, a few-shot example, and a prompt-injection defense.
-- **Prompt versioning:** v1 (baseline) vs v2 (engineered) selectable in the UI to compare outputs.
+- **Prompt versioning:** v1 (baseline), v2 (engineered) and v3 (v2 plus a no-fabrication rule) selectable in the UI. v3 exists because testing showed v2 sometimes wrote example bullets claiming skills the candidate lacks.
+- **Guard against fabricated skills:** the server flags any suggested bullet that mentions a skill the fact-check says is missing from the resume.
 - **Multi-model fallback:** tries a list of Gemini models in order (`GEMINI_MODELS`).
 - **Deterministic checks on the AI output (server side):** the score is recomputed from the rubric parts, "missing" keywords that are actually in the resume are removed, and the verdict is derived from the score.
 - **Secure by design:** the API key lives only in a Vercel environment variable, used by `api/analyze.js`. It is never sent to the browser. Input size limits and a per-IP rate limit.
