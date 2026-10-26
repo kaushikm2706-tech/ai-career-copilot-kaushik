@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fresher Copilot | AI Career Copilot</title>
+<meta name="description" content="AI Career Copilot (Fresher Edition): paste your resume and a job description, get an honest ATS score, missing keywords and rewrites. Built with the Gemini API.">
+<style>
+:root{
+  --bg:#f4efe6; --card:#fffdf8; --ink:#1d2a2a; --muted:#5d6b69; --line:#e2d9c8;
+  --accent:#0f766e; --accent-ink:#ffffff; --good:#15803d; --warn:#b45309; --bad:#b91c1c; --chip:#efe7d6;
+  --shadow:0 1px 0 rgba(0,0,0,.04),0 8px 24px rgba(60,50,20,.08);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12181a; --card:#1a2326; --ink:#e8efee; --muted:#9db0ae; --line:#2b3a3d; --accent:#2dd4bf; --accent-ink:#06201d;
+  --good:#4ade80; --warn:#fbbf24; --bad:#f87171; --chip:#223034; --shadow:none;}}
+:root[data-theme="dark"]{
+  --bg:#12181a; --card:#1a2326; --ink:#e8efee; --muted:#9db0ae; --line:#2b3a3d; --accent:#2dd4bf; --accent-ink:#06201d;
+  --good:#4ade80; --warn:#fbbf24; --bad:#f87171; --chip:#223034; --shadow:none;}
+*{box-sizing:border-box}
+.grid>*,.cols>*,.res-head>*{min-width:0}
+textarea,select{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.2;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 16px 56px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:700 20px Georgia,serif}
+.brand h1{font-size:24px} .brand small{display:block;color:var(--muted);font-size:13px}
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;font:inherit;font-size:14px;cursor:pointer}
+.btn:hover{border-color:var(--accent)} .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;padding:12px 22px;font-size:16px}
+.btn.primary:disabled{opacity:.6;cursor:wait}
+.hero{margin:6px 0 18px;color:var(--muted);max-width:720px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.card h2{font-size:18px;margin-bottom:10px}
+label.lbl{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:14px;margin-bottom:6px;gap:8px}
+textarea{width:100%;min-height:250px;resize:vertical;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:12px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+textarea:focus,select:focus,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.count{font-weight:400;color:var(--muted);font-size:12px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
+select{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 10px;border-radius:10px;font:inherit;font-size:14px;max-width:100%}
+.row-note{font-size:13px;color:var(--muted)}
+#status{margin:10px 0;min-height:22px;font-size:14px}
+.err{color:var(--bad);font-weight:600} .ok{color:var(--good)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+#results{display:none;margin-top:20px}
+.res-head{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:center}
+@media(max-width:700px){.res-head{grid-template-columns:1fr}}
+.gauge{text-align:center}
+.verdict{display:inline-block;padding:3px 12px;border-radius:99px;font-weight:700;font-size:13px;color:#fff;margin-top:2px}
+.v-strong{background:var(--good)} .v-good{background:#0f766e} .v-partial{background:var(--warn)} .v-weak{background:var(--bad)}
+.dark-tx{color:#fff}
+.parts{display:grid;gap:6px;margin-top:10px}
+.part{display:grid;grid-template-columns:92px 1fr 44px;gap:8px;align-items:center;font-size:13px}
+.cells{display:flex;gap:3px}.cell{height:10px;flex:1;border-radius:2px;background:var(--chip)}.cell.on{background:var(--accent)}
+.strip{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{padding:4px 10px;border-radius:8px;font-size:13px;border:1.5px solid var(--good);color:var(--ink);background:transparent}
+.chip.miss{border:1.5px dashed var(--bad)} 
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:820px){.cols{grid-template-columns:1fr}}
+.item{border-left:3px solid var(--accent);padding:6px 0 6px 12px;margin:10px 0}
+.item b{display:block} .item p{margin:2px 0;color:var(--muted);font-size:14px}
+.rewrite{background:var(--chip);border-radius:8px;padding:8px 10px;font-size:14px;margin-top:6px}
+.pri{font-size:11px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--chip);margin-left:6px}
+.pri.high{background:var(--bad);color:#fff}.pri.medium{background:var(--warn);color:#fff}
+ol.plan{margin:6px 0 0;padding-left:20px} ol.plan li{margin:6px 0}
+.meta{font-size:12px;color:var(--muted);margin-top:14px}
+.hist-item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.hist-item button{all:unset;cursor:pointer;color:var(--accent);font-weight:600}
+footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
+.mini{font-size:12px;padding:5px 9px}
+@media print{header.top,.grid,.bar,#status,#historyCard,footer,.noprint{display:none!important}#results{display:block!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">F</div>
+      <div><h1>Fresher Copilot</h1><small>AI Career Copilot &middot; for students and fresh graduates</small></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="themeBtn" type="button">Toggle theme</button>
+    </div>
+  </header>
+  <p class="hero">Paste your resume and a job description. You get an honest score, the skills you are missing, and rewritten bullets you can use today. Your text is sent only to the AI model, nothing is stored on a server.</p>
+
+  <div class="grid">
+    <section class="card">
+      <label class="lbl" for="resume"><span>Your resume (text)</span><span class="count" id="rc">0 / 12000</span></label>
+      <textarea id="resume" placeholder="Paste your resume text here, or upload a PDF below."></textarea>
+      <div class="bar">
+        <input type="file" id="pdf" accept="application/pdf" hidden>
+        <button class="btn" id="pdfBtn" type="button">Upload PDF resume</button>
+        <span class="row-note" id="pdfNote">Text PDFs only (scanned images will not work).</span>
+      </div>
+    </section>
+    <section class="card">
+      <label class="lbl" for="jd"><span>Job description</span><span class="count" id="jc">0 / 8000</span></label>
+      <textarea id="jd" placeholder="Paste the job description you are applying for."></textarea>
+      <div class="bar">
+        <select id="sample" aria-label="Load a sample test case"><option value="">Load a sample test case...</option></select>
+      </div>
+    </section>
+  </div>
+
+  <div class="bar">
+    <button class="btn primary" id="go" type="button">Analyze my resume</button>
+    <label class="row-note" for="ver">Prompt version:</label>
+    <select id="ver" aria-label="Prompt version"><option value="v2">v2 - Fresher advisor (engineered)</option><option value="v1">v1 - Baseline (simple prompt)</option></select>
+  </div>
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <section id="results" class="card" aria-live="polite">
+    <div class="res-head">
+      <div class="gauge">
+        <svg id="gaugeSvg" viewBox="0 0 220 152" width="220" height="152" role="img" aria-label="ATS score gauge"></svg>
+        <div><span id="verdict" class="verdict"></span></div>
+      </div>
+      <div>
+        <h2>Result</h2>
+        <p id="summary" style="margin:6px 0 0"></p>
+        <div class="parts" id="parts"></div>
+      </div>
+    </div>
+    <div class="cols">
+      <div><h3>Keyword coverage</h3>
+        <div class="row-note">Solid outline = in your resume. Dashed = missing.</div>
+        <div class="strip" id="kw"></div>
+        <div class="row-note" id="checks" style="margin-top:8px"></div>
+        <h3 style="margin-top:18px">Strengths</h3><div id="strengths"></div>
+      </div>
+      <div><h3>Skill gaps</h3><div id="gaps"></div></div>
+    </div>
+    <div class="cols">
+      <div><h3>Fix these first</h3><div id="imps"></div></div>
+      <div><h3>30-day plan</h3><ol class="plan" id="plan"></ol>
+        <h3 style="margin-top:18px">Likely interview questions</h3><ol class="plan" id="qs"></ol></div>
+    </div>
+    <div class="bar noprint"><button class="btn" id="copyBtn" type="button">Copy report</button><button class="btn" id="printBtn" type="button">Print / save as PDF</button></div>
+    <div class="meta" id="meta"></div>
+  </section>
+
+  <section class="card" id="historyCard" style="margin-top:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>History (this browser only)</h2><button class="btn mini" id="clearHist" type="button">Clear</button></div>
+    <div id="hist"><div class="row-note">No analyses yet.</div></div>
+  </section>
+  <footer>Built by Kaushik M &middot; Gemini API + Vercel &middot; Scores are guidance, not a guarantee of any recruiter's decision.</footer>
+</div>
+
+<script src="samples.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){return document.getElementById(id)};
+  var LIM = {resume:12000, jd:8000};
+  var last = null;
+
+  // ---------- safe storage ----------
+  function lsGet(k, d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+  // ---------- helpers (model output is ALWAYS inserted as text, never as HTML) ----------
+  function el(tag, cls, text){ var e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
+  function clear(n){ while(n.firstChild) n.removeChild(n.firstChild); }
+
+  // ---------- theme ----------
+  var theme = lsGet("fc_theme", null);
+  if(theme) document.documentElement.setAttribute("data-theme", theme);
+  $("themeBtn").onclick = function(){
+    var dark = document.documentElement.getAttribute("data-theme") === "dark" ||
+      (!document.documentElement.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next); lsSet("fc_theme", next);
+  };
+
+  // ---------- counters ----------
+  function counts(){ $("rc").textContent = $("resume").value.length + " / " + LIM.resume; $("jc").textContent = $("jd").value.length + " / " + LIM.jd; }
+  $("resume").addEventListener("input", counts); $("jd").addEventListener("input", counts);
+
+  // ---------- samples ----------
+  (window.SAMPLES || []).forEach(function(s, i){ var o = el("option", null, s.name); o.value = i; $("sample").appendChild(o); });
+  $("sample").onchange = function(){
+    if($("sample").value === "") return;
+    var s = window.SAMPLES[Number($("sample").value)];
+    $("resume").value = s.resume; $("jd").value = s.jd; counts(); status("Sample loaded. Click Analyze.", "ok");
+  };
+
+  // ---------- PDF upload ----------
+  $("pdfBtn").onclick = function(){ $("pdf").click(); };
+  $("pdf").onchange = function(){
+    var f = $("pdf").files[0]; if(!f) return;
+    if(!window.pdfjsLib){ status("PDF reader failed to load. Paste your text instead.", "err"); return; }
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    $("pdfNote").textContent = "Reading " + f.name + "...";
+    var rd = new FileReader();
+    rd.onload = function(){
+      window.pdfjsLib.getDocument({data: new Uint8Array(rd.result)}).promise.then(function(pdf){
+        var n = Math.min(pdf.numPages, 6), out = [], p = Promise.resolve();
+        for(var i = 1; i <= n; i++){ (function(i){ p = p.then(function(){ return pdf.getPage(i).then(function(pg){ return pg.getTextContent(); }).then(function(tc){ out.push(tc.items.map(function(x){return x.str;}).join(" ")); }); }); })(i); }
+        return p.then(function(){ return out.join("\n"); });
+      }).then(function(text){
+        text = text.replace(/[ \t]+/g, " ").trim();
+        if(text.length < 40){ $("pdfNote").textContent = "No readable text found (scanned PDF?). Paste text instead."; return; }
+        $("resume").value = text.slice(0, LIM.resume); counts();
+        $("pdfNote").textContent = "Loaded " + f.name + " (" + text.length + " characters). Check the text for errors.";
+      }).catch(function(){ $("pdfNote").textContent = "Could not read this PDF. Paste text instead."; });
+    };
+    rd.readAsArrayBuffer(f);
+  };
+
+  // ---------- status ----------
+  function status(msg, kind, spin){
+    var s = $("status"); clear(s);
+    if(spin){ s.appendChild(el("span","spin")); }
+    var t = el("span", kind || "", msg); s.appendChild(t);
+  }
+
+  // ---------- gauge (semicircle with needle) ----------
+  function drawGauge(score){
+    var svg = $("gaugeSvg"); clear(svg);
+    var NS = "http://www.w3.org/2000/svg";
+    function mk(n, a){ var e = document.createElementNS(NS, n); for(var k in a) e.setAttribute(k, a[k]); return e; }
+    var cx = 110, cy = 110, r = 90;
+    function pt(v, rad){ var ang = Math.PI * (1 - v/100); return [cx + rad*Math.cos(ang), cy - rad*Math.sin(ang)]; }
+    var zones = [[0,45,"var(--bad)"],[45,65,"var(--warn)"],[65,80,"#0f766e"],[80,100,"var(--good)"]];
+    zones.forEach(function(z){
+      var a = pt(z[0], r), b = pt(z[1], r);
+      svg.appendChild(mk("path",{d:"M"+a[0]+" "+a[1]+" A "+r+" "+r+" 0 0 1 "+b[0]+" "+b[1], fill:"none", stroke:z[2], "stroke-width":14, opacity:.85}));
+    });
+    for(var t = 0; t <= 100; t += 10){ var p1 = pt(t, r-12), p2 = pt(t, r-20); svg.appendChild(mk("line",{x1:p1[0],y1:p1[1],x2:p2[0],y2:p2[1],stroke:"var(--muted)","stroke-width":1})); }
+    var tip = pt(score, r-24);
+    svg.appendChild(mk("line",{x1:cx,y1:cy,x2:tip[0],y2:tip[1],stroke:"var(--ink)","stroke-width":3,"stroke-linecap":"round"}));
+    svg.appendChild(mk("circle",{cx:cx,cy:cy,r:7,fill:"var(--ink)"}));
+    var tx = mk("text",{x:cx,y:cy+36,"text-anchor":"middle","font-size":28,"font-weight":700,fill:"var(--ink)","font-family":"Georgia,serif"}); tx.textContent = score; svg.appendChild(tx);
+  }
+
+  // ---------- render results ----------
+  function render(d){
+    last = d;
+    $("results").style.display = "block";
+    drawGauge(d.ats_score);
+    var v = $("verdict"); v.textContent = d.verdict; v.className = "verdict " + (d.ats_score>=80?"v-strong":d.ats_score>=65?"v-good":d.ats_score>=45?"v-partial":"v-weak");
+    $("summary").textContent = d.summary || "";
+    var parts = $("parts"); clear(parts);
+    if(d.score_breakdown){
+      var defs = [["Keywords","keywords",40],["Experience","experience",30],["Education","education",10],["Impact","impact",10],["Clarity","clarity",10]];
+      defs.forEach(function(x){
+        var row = el("div","part"); row.appendChild(el("span",null,x[0]));
+        var cells = el("div","cells"), on = Math.round(d.score_breakdown[x[1]] / x[2] * 10);
+        for(var i = 0; i < 10; i++) cells.appendChild(el("span","cell" + (i < on ? " on" : "")));
+        row.appendChild(cells); row.appendChild(el("span",null,d.score_breakdown[x[1]] + "/" + x[2])); parts.appendChild(row);
+      });
+    }
+    var kw = $("kw"); clear(kw);
+    d.matched_keywords.forEach(function(k){ kw.appendChild(el("span","chip",k)); });
+    d.missing_keywords.forEach(function(k){ kw.appendChild(el("span","chip miss",k)); });
+    if(!d.matched_keywords.length && !d.missing_keywords.length) kw.appendChild(el("span","row-note","No keywords returned."));
+    $("checks").textContent = d.checks && d.checks.keywords_removed_by_fact_check ? "Fact-check: " + d.checks.keywords_removed_by_fact_check + " keyword(s) the AI called missing were found in your resume and removed." : "Fact-check passed: no 'missing' keyword appears in your resume.";
+    var st = $("strengths"); clear(st);
+    d.strengths.forEach(function(s){ var i = el("div","item"); i.appendChild(el("b",null,s.point)); i.appendChild(el("p",null,s.evidence)); st.appendChild(i); });
+    var g = $("gaps"); clear(g);
+    d.skill_gaps.forEach(function(s){ var i = el("div","item"), b = el("b",null,s.skill); b.appendChild(el("span","pri "+s.priority,s.priority)); i.appendChild(b); i.appendChild(el("p",null,s.how_to_close)); g.appendChild(i); });
+    var im = $("imps"); clear(im);
+    d.improvements.forEach(function(s){
+      var i = el("div","item"); i.appendChild(el("b",null,s.issue)); i.appendChild(el("p",null,s.fix));
+      if(s.example_rewrite){ var rw = el("div","rewrite", s.example_rewrite); i.appendChild(rw); }
+      im.appendChild(i);
+    });
+    var pl = $("plan"); clear(pl); d.action_plan.forEach(function(s){ pl.appendChild(el("li",null,s)); });
+    var q = $("qs"); clear(q); d.interview_questions.forEach(function(s){ q.appendChild(el("li",null,s)); });
+    $("meta").textContent = "Model: " + (d.meta && d.meta.model) + " | Prompt: " + (d.meta && d.meta.prompt_version) + (d.meta && d.meta.tried && d.meta.tried.length ? " | Fallback used after: " + d.meta.tried.join("; ") : "");
+    $("results").scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  // ---------- history ----------
+  function renderHist(){
+    var h = lsGet("fc_hist", []), box = $("hist"); clear(box);
+    if(!h.length){ box.appendChild(el("div","row-note","No analyses yet.")); return; }
+    h.forEach(function(it, idx){
+      var r = el("div","hist-item"), left = el("span",null, it.score + "/100 - " + it.label + " (" + it.ver + ", " + it.date + ")");
+      var b = el("button",null,"Open"); b.type = "button"; b.onclick = function(){ render(it.data); };
+      r.appendChild(left); r.appendChild(b); box.appendChild(r);
+    });
+  }
+  function saveHist(d, ver){
+    var h = lsGet("fc_hist", []), jd = $("jd").value.trim().split(/\n/)[0].slice(0, 40) || "Analysis";
+    h.unshift({score:d.ats_score, label:jd, ver:ver, date:new Date().toLocaleString(), data:d});
+    lsSet("fc_hist", h.slice(0, 8)); renderHist();
+  }
+  $("clearHist").onclick = function(){ lsSet("fc_hist", []); renderHist(); };
+
+  // ---------- analyze ----------
+  $("go").onclick = function(){
+    var resume = $("resume").value.trim(), jd = $("jd").value.trim(), ver = $("ver").value;
+    if(resume.length < 80){ status("Add your resume text first (at least 80 characters).", "err"); return; }
+    if(jd.length < 30){ status("Add the job description (at least 30 characters).", "err"); return; }
+    if(resume.length > LIM.resume || jd.length > LIM.jd){ status("Text too long. Trim it to the limits shown above.", "err"); return; }
+    var btn = $("go"); btn.disabled = true; status("Analyzing with Gemini... usually 5-20 seconds.", "", true);
+    fetch("/api/analyze", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({resume:resume, jobDescription:jd, promptVersion:ver})})
+      .then(function(r){ return r.json().catch(function(){ return {error:"Server returned an unreadable response."}; }).then(function(j){ return {ok:r.ok, j:j}; }); })
+      .then(function(x){
+        if(!x.ok){ status(x.j.error || "Something went wrong.", "err"); return; }
+        status("Done.", "ok"); render(x.j); saveHist(x.j, ver);
+      })
+      .catch(function(){ status("Could not reach the server. Check your internet and try again.", "err"); })
+      .then(function(){ btn.disabled = false; });
+  };
+
+  // ---------- copy / print ----------
+  $("copyBtn").onclick = function(){
+    if(!last) return;
+    var d = last, L = [];
+    L.push("ATS score: " + d.ats_score + "/100 (" + d.verdict + ")", d.summary, "", "Missing keywords: " + d.missing_keywords.join(", "), "", "Fix first:");
+    d.improvements.forEach(function(s,i){ L.push((i+1) + ". " + s.issue + " -> " + s.fix + (s.example_rewrite ? "\n   Rewrite: " + s.example_rewrite : "")); });
+    L.push("", "30-day plan:"); d.action_plan.forEach(function(s,i){ L.push((i+1) + ". " + s); });
+    var txt = L.join("\n");
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function(){ status("Report copied.", "ok"); }).catch(function(){ status("Copy not allowed here. Select and copy manually.", "err"); });
+  };
+  $("printBtn").onclick = function(){ window.print(); };
+
+  counts(); renderHist();
+})();
+</script>
+</body>
+</html>
