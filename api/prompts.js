@@ -57,4 +57,19 @@ Input resume: "B.Tech CSE. Project: Spam classifier in Python, 92% accuracy. Ski
 Output: {"score_breakdown":{"keywords":18,"experience":18,"education":6,"impact":6,"clarity":7},"summary":"Relevant Python ML project with a real metric, but the resume never names scikit-learn or Git. Solid base for an intern role.","matched_keywords":["Python","classification"],"missing_keywords":["scikit-learn","Git"],"strengths":[{"point":"Measured result","evidence":"Spam classifier with 92% accuracy"}],"improvements":[{"issue":"Tools not named","fix":"Name the libraries used in the project bullet","example_rewrite":"Built a spam classifier in Python reaching 92% accuracy; add the library used (e.g. scikit-learn) if true."}],"skill_gaps":[{"skill":"Git","priority":"high","how_to_close":"Push the spam classifier to a public GitHub repo with a README."}],"action_plan":["Push the project to GitHub","Rewrite the project bullet with tools named","Add a train/test split result","Apply to 5 internships"],"interview_questions":["How did you evaluate the spam classifier?","What would you do if the classes were imbalanced?","Explain overfitting."]}`,
 };
 
-module.exports = { VERSIONS: { v1: V1, v2: V2 }, DEFAULT_VERSION: "v2" };
+
+// v3 = v2 + a fix found by testing: v2 sometimes wrote example bullets that CLAIMED skills the candidate does not have
+// (e.g. "Skills: Python, SQL" for a resume with no Python). v3 forces bracketed templates when no evidence exists.
+const RULE5_OLD = "5. example_rewrite must not add numbers that are not in the resume. If no number exists, tell the candidate to add one in \"fix\".";
+const RULE5_NEW = "5. example_rewrite may ONLY re-word facts already in the resume. NEVER claim a skill, tool, project or number the candidate did not state. If the resume has no relevant fact, write a template with [square brackets] for the candidate to fill in only if true, e.g. \"[Built X using Y, achieving Z]\". A rewrite that adds a skill missing from the resume is a critical error.";
+const EX_OLD = "Build a spam classifier in Python reaching 92% accuracy; add the library used (e.g. scikit-learn) if true.";
+const EX_NEW = "Built a spam classifier in Python reaching 92% accuracy using [library name].";
+if (!V2.system.includes(RULE5_OLD)) throw new Error("prompt rule 5 text changed; update v3 replacement");
+const V3 = {
+  id: "v3",
+  label: "v3 - v2 + no-fabrication rule (recommended)",
+  note: "Iteration after testing: rewrites must not claim skills the resume lacks; templates in [brackets] instead.",
+  system: V2.system.replace(RULE5_OLD, RULE5_NEW).replace(EX_OLD.replace("Build a","Built a"), EX_NEW),
+};
+
+module.exports = { VERSIONS: { v1: V1, v2: V2, v3: V3 }, DEFAULT_VERSION: "v3" };
