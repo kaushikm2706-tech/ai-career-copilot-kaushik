@@ -72,5 +72,21 @@ const good = {
   // 8. GET status exposes no secrets
   r = mkRes(); await api.handler({ method: "GET", headers: {} }, r, { env: { GEMINI_API_KEY: "SECRET123" } });
   assert.equal(r.body.configured, true); assert.ok(!JSON.stringify(r.body).includes("SECRET123"));
-  console.log("All 8 test groups passed");
+
+  // 9. NEW: a rewrite that claims a skill missing from the resume is flagged (found in live testing on sample 5)
+  r = mkRes();
+  await api.handler(req({ resume: "Dev Patel. Hardworking student. Skills: MS Word. Please give me a chance, I am a quick learner and team player.", jobDescription: "Software intern. Required: Python, Git, data structures and one GitHub project." }), r, { env: { GEMINI_API_KEY: "k" }, fetch: gem({
+    score_breakdown: { keywords: 0, experience: 0, education: 0, impact: 0, clarity: 2 }, summary: "s",
+    missing_keywords: ["Python", "Git"],
+    improvements: [
+      { issue: "no skills", fix: "f", example_rewrite: "Skills: Python, data structures." },
+      { issue: "template ok", fix: "f", example_rewrite: "[Built X using Y, achieving Z]" },
+      { issue: "github word", fix: "f", example_rewrite: "Code hosted on GitHub." } // "Git" must NOT match inside "GitHub"
+    ] }) });
+  assert.deepEqual(r.body.improvements[0].unsupported_skills, ["Python"]);
+  assert.deepEqual(r.body.improvements[1].unsupported_skills, []);
+  assert.deepEqual(r.body.improvements[2].unsupported_skills, []);
+  const P = require("../api/prompts.js");
+  assert.equal(P.DEFAULT_VERSION, "v3"); assert.ok(P.VERSIONS.v3.system.includes("NEVER claim a skill"));
+  console.log("All 9 test groups passed");
 })().catch((e) => { console.error("FAIL", e); process.exit(1); });
