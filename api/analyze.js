@@ -53,6 +53,8 @@ function normalize(raw, resumeText) {
   const missing = missingRaw.filter((k) => !lower.includes(k.toLowerCase())); // fact-check: drop "missing" skills that ARE in the resume
   const removed = missingRaw.length - missing.length;
   const verdict = score >= 80 ? "Strong match" : score >= 65 ? "Good match" : score >= 45 ? "Partial match" : "Weak match";
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const mentions = (text, kw) => new RegExp("(^|[^a-z0-9+#.])" + esc(kw.toLowerCase()) + "($|[^a-z0-9+#.])", "i").test(text);
   const pr = (p) => (["high", "medium", "low"].includes(String(p).toLowerCase()) ? String(p).toLowerCase() : "medium");
   return {
     ats_score: score,
@@ -62,9 +64,12 @@ function normalize(raw, resumeText) {
     matched_keywords: arr(raw.matched_keywords, 8).map((k) => str(k, 60)).filter(Boolean),
     missing_keywords: missing.slice(0, 8),
     strengths: arr(raw.strengths, 4).map((s) => ({ point: str(s && s.point), evidence: str(s && s.evidence) })),
-    improvements: arr(raw.improvements, 5).map((s) => ({
-      issue: str(s && s.issue), fix: str(s && s.fix, 300), example_rewrite: str(s && s.example_rewrite, 300),
-    })),
+    // guard: a suggested bullet must not claim a skill that the fact-check says is absent from the resume
+    improvements: arr(raw.improvements, 5).map((s) => {
+      const rw = str(s && s.example_rewrite, 300);
+      return { issue: str(s && s.issue), fix: str(s && s.fix, 300), example_rewrite: rw,
+        unsupported_skills: missing.filter((k) => mentions(rw, k)).slice(0, 4) };
+    }),
     skill_gaps: arr(raw.skill_gaps, 5).map((s) => ({
       skill: str(s && s.skill, 80), priority: pr(s && s.priority), how_to_close: str(s && s.how_to_close, 300),
     })),
