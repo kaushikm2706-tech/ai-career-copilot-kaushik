@@ -1,12 +1,12 @@
 // Five synthetic test cases (fictional people) for the "test with 5 resumes" step.
 window.SAMPLES = [
-  { name: "1. Strong fit: ML intern",
+  { name: "1. ML intern (aligned resume)",
     resume: "Asha Verma | B.E. Computer Science (2027), CGPA 8.4\nProjects\n- Spam classifier in Python with scikit-learn: 92% accuracy on 5,000 emails, train/test split and confusion matrix.\n- Flask API serving the model, containerised with Docker, code on GitHub.\nInternship: Python backend developer, 3 months, built 6 REST endpoints used by 40 testers.\nSkills: Python, scikit-learn, pandas, SQL, Git, Docker, model evaluation\nCertifications: Google Data Analytics",
     jd: "Machine Learning Intern. Must know Python, scikit-learn, Git, Docker and model evaluation. Nice to have: Flask or FastAPI, SQL. Final-year students welcome." },
-  { name: "2. Partial fit: web dev to AI role",
+  { name: "2. Web dev resume for an AI role",
     resume: "Rohit Nair | B.Tech IT (2027)\nProjects\n- Portfolio website using HTML, CSS and JavaScript.\n- To-do app in React with localStorage.\n- Weather app calling a public API.\nSkills: HTML, CSS, JavaScript, React, Git\nActivities: college coding club member",
     jd: "AI Engineer Intern. Required: Python, machine learning basics, scikit-learn or PyTorch, REST APIs, Git. Experience building or fine-tuning models is a plus." },
-  { name: "3. Weak fit: non-tech resume",
+  { name: "3. Non-tech resume for a data role",
     resume: "Meena Iyer | B.Com graduate\nExperience: Front-desk assistant at a clinic for 1 year, handled appointment scheduling and customer calls.\nSkills: Microsoft Excel, communication, Tally\nHobbies: reading, badminton",
     jd: "Data Analyst Intern. Required: SQL, Python (pandas), data visualisation (Power BI or Tableau), statistics, and the ability to present insights." },
   { name: "4. Injection test (resume tries to hack the score)",
